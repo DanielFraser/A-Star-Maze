@@ -36,14 +36,17 @@ def createPossible(loc):
 # while we have nodes to go to
 
 # print path by starting at goal
-def getPath(start):
+def getPath(start, reverse):
+    if reverse:
+        start = goal
     cur = closed[-1]
-    path = [cur.loc]
+    pathL = [cur.loc]
     while cur.loc != start:
         cur = cur.parent
-        path.append(cur.loc)
-
-    return path.reverse()
+        pathL.append(cur.loc)
+    if not reverse:
+        pathL.reverse()
+    return pathL
 
 # finds a path using A*
 def findPath(start, reverse=False):
@@ -53,28 +56,20 @@ def findPath(start, reverse=False):
         localGoal, start = start, localGoal # reverse the values for backwards
     openList = []
     hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal)))
-    print("distance: {}".format(Utility.distance(start, localGoal)))
     foundGoal = False
     while openList and not foundGoal:
-        print("openList: {}".format(openList))
         current = hpq.heappop(openList) # get next best position
-        print("Current: {}".format(current))
+        closed.append(current)  # add node to closed list
         if current.loc == localGoal: # found goal
             foundGoal = True
             break
-
-        # print(currentMap)
-        closed.append(current) # add node to closed list
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
-            # check if its in open list, remove item from openList if new item is better
-            # if any(y.loc == x for y in closed):
-
             # Node(location, parent, g, h)Utility.distance(start, localGoal)
             node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal))
             hpq.heappush(openList, node) # add it to binary heap
-    if(foundGoal):
-        return getPath(start)
+    if foundGoal:
+        return getPath(start, reverse)
     else:
         return []
 
@@ -92,21 +87,18 @@ def moveAgent(path):
 
 # main method
 if __name__ == '__main__':
-    print(list([0, 0]))
     start = [0, 0]
     goal = [size - 1, size - 1]
     agent = start
     updateMap(agent)  # remove fog of war
     while agent != goal:
-        print('b')
-        path = findPath(agent, goal) # get path (need to create one for reverse)
+        path = findPath(agent, True) # get path (need to create one for reverse)
         finalPath = path
         if path:    # if there is a path, move agent
             moveAgent(path)
         else:   # no path, unable to get to goal
             print("No path found")
             break
-    print("a")
     print(finalPath)
 
 # process = psutil.Process(os.getpid())
