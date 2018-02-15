@@ -8,9 +8,9 @@ size = 20
 # load in a test case
 #ACTUAL = np.load('test.npy')
 ACTUAL = np.full((size, size), 0, dtype=np.int8)
+ACTUAL[2,0] = 1
 # create blank board
 currentMap = np.full((size, size), 0, dtype=np.int8)
-agent = [0, 0]
 closed = []  # always empty at start
 finalPath = []
 
@@ -55,35 +55,46 @@ def findPath(start, reverse=False):
     if reverse:
         localGoal, start = start, localGoal # reverse the values for backwards
     openList = []
-    hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal)))
+    if closed:
+        hpq.heappush(openList, closed[-1])
+    else:
+        hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal)))
     foundGoal = False
     while openList and not foundGoal:
         current = hpq.heappop(openList) # get next best position
         closed.append(current)  # add node to closed list
+
         if current.loc == localGoal: # found goal
             foundGoal = True
             break
+        print(current)
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
             # Node(location, parent, g, h)Utility.distance(start, localGoal)
             node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal))
             hpq.heappush(openList, node) # add it to binary heap
+
     if foundGoal:
+        print('yes')
         return getPath(start, reverse)
     else:
         return []
 
 # move agent and remove fog of war
 def moveAgent(path):
-    for x in path:
+    for y,x in enumerate(path):
         x = list(x)
         updateMap(x) # remove fog of war
+        global finalPath
         if currentMap[x[0], x[1]] == 0:
             global agent
             agent = x
+            finalPath.append(x)
         else:
-            return None # we need to find a new path
-
+            finalPath = finalPath[:-1]
+            global closed
+            closed = closed[:y] # get rid of unused items in closed list
+            break
 
 # main method
 if __name__ == '__main__':
@@ -92,14 +103,15 @@ if __name__ == '__main__':
     agent = start
     updateMap(agent)  # remove fog of war
     while agent != goal:
-        path = findPath(agent, True) # get path (need to create one for reverse)
-        finalPath = path
+        path = findPath(agent) # get path (need to create one for reverse)
+        #finalPath = path
         if path:    # if there is a path, move agent
             moveAgent(path)
         else:   # no path, unable to get to goal
             print("No path found")
             break
-    print(finalPath)
+        print("agent = {}".format(agent))
+    print("Final path = {}".format(finalPath))
 
 # process = psutil.Process(os.getpid())
 # print(process.memory_info().rss)
