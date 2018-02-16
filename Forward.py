@@ -4,11 +4,13 @@ import numpy as np
 
 import Utility
 
-size = 20
+size = 101
 # load in a test case
 #ACTUAL = np.load('test.npy')
 ACTUAL = np.full((size, size), 0, dtype=np.int8)
 ACTUAL[2,0] = 1
+#ACTUAL[18,19] = 1
+#ACTUAL[19,18] = 1
 # create blank board
 currentMap = np.full((size, size), 0, dtype=np.int8)
 closed = []  # always empty at start
@@ -67,7 +69,7 @@ def findPath(start, reverse=False):
         if current.loc == localGoal: # found goal
             foundGoal = True
             break
-        print(current)
+
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
             # Node(location, parent, g, h)Utility.distance(start, localGoal)
@@ -75,7 +77,6 @@ def findPath(start, reverse=False):
             hpq.heappush(openList, node) # add it to binary heap
 
     if foundGoal:
-        print('yes')
         return getPath(start, reverse)
     else:
         return []
@@ -84,9 +85,9 @@ def findPath(start, reverse=False):
 def moveAgent(path):
     for y,x in enumerate(path):
         x = list(x)
-        updateMap(x) # remove fog of war
         global finalPath
         if currentMap[x[0], x[1]] == 0:
+            updateMap(x)  # remove fog of war
             global agent
             agent = x
             finalPath.append(x)
@@ -108,10 +109,12 @@ if __name__ == '__main__':
         if path:    # if there is a path, move agent
             moveAgent(path)
         else:   # no path, unable to get to goal
+            finalPath = []
             print("No path found")
             break
-        print("agent = {}".format(agent))
-    print("Final path = {}".format(finalPath))
+
+    if finalPath:
+        print("Final path = {}".format(finalPath))
 
 # process = psutil.Process(os.getpid())
 # print(process.memory_info().rss)

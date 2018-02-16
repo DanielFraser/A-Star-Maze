@@ -1,6 +1,6 @@
 
 class Node:
-    # constructor that
+    # constructor
     def __init__(self, loci, parenti=None, gi=1, hi=-1):
         self.loc = loci
         self.parent = parenti
