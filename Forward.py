@@ -6,13 +6,15 @@ import Utility
 
 size = 101
 # load in a test case
-#ACTUAL = np.load('test.npy')
-ACTUAL = np.full((size, size), 0, dtype=np.int8)
-ACTUAL[2,0] = 1
+ACTUAL = np.load('Mazes/maze01.npy')
+#print(ACTUAL)
+#ACTUAL = np.full((size, size), 0, dtype=np.int8)
+#ACTUAL[2,0] = 1
 #ACTUAL[18,19] = 1
 #ACTUAL[19,18] = 1
 # create blank board
 currentMap = np.full((size, size), 0, dtype=np.int8)
+openList = []
 closed = []  # always empty at start
 finalPath = []
 
@@ -42,10 +44,10 @@ def getPath(start, reverse):
     if reverse:
         start = goal
     cur = closed[-1]
-    pathL = [cur.loc]
+    pathL = [cur]
     while cur.loc != start:
         cur = cur.parent
-        pathL.append(cur.loc)
+        pathL.append(cur)
     if not reverse:
         pathL.reverse()
     return pathL
@@ -56,8 +58,11 @@ def findPath(start, reverse=False):
     localGoal = goal
     if reverse:
         localGoal, start = start, localGoal # reverse the values for backwards
-    openList = []
+    global openList
     if closed:
+        openList = []
+        closed[-1].g = 0
+        closed[-1].f = closed[-1].g + Utility.distance(closed[-1].loc, localGoal)
         hpq.heappush(openList, closed[-1])
     else:
         hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal)))
@@ -84,7 +89,7 @@ def findPath(start, reverse=False):
 # move agent and remove fog of war
 def moveAgent(path):
     for y,x in enumerate(path):
-        x = list(x)
+        x = x.loc
         global finalPath
         if currentMap[x[0], x[1]] == 0:
             updateMap(x)  # remove fog of war
@@ -94,7 +99,7 @@ def moveAgent(path):
         else:
             finalPath = finalPath[:-1]
             global closed
-            closed = closed[:y] # get rid of unused items in closed list
+            closed = [path[y-1]] # get rid of unused items in closed list
             break
 
 # main method
@@ -105,7 +110,7 @@ if __name__ == '__main__':
     updateMap(agent)  # remove fog of war
     while agent != goal:
         path = findPath(agent) # get path (need to create one for reverse)
-        #finalPath = path
+
         if path:    # if there is a path, move agent
             moveAgent(path)
         else:   # no path, unable to get to goal
@@ -116,5 +121,4 @@ if __name__ == '__main__':
     if finalPath:
         print("Final path = {}".format(finalPath))
 
-# process = psutil.Process(os.getpid())
-# print(process.memory_info().rss)
+# need backtracking and updating g values

@@ -1,18 +1,21 @@
 
 class Node:
     # constructor
-    def __init__(self, loci, parenti=None, gi=1, hi=-1):
+    def __init__(self, loci, parenti=None, gi=1, hi=-1,smallG = False):
         self.loc = loci
         self.parent = parenti
         self.g = gi
         self.f = self.g + hi
+        self.bool = smallG
 
     # almost like equals method in java, but for less than (needed for binary heap)
     def __lt__(self, other):
         if self.f != other.f:
             return self.f < other.f
         else:
-            return self.g > other.g
+            if not self.bool:
+                return self.g > other.g
+            return  self.g < other.g
     def __repr__(self):
         return "loc: {}, f: {}, g: {}".format(self.loc, self.f, self.g)
 
