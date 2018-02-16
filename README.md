@@ -3,12 +3,12 @@ Using A*, we solve randomized mazes
 
 ### TODO
 
-* Create 50 randomized mazes
-* Create a gui to visualize the maze
-* A* Algorithms
-    * Forward
-    * Backward
-    * Adaptive
+* :x: Create 50 randomized mazes
+* :construction: Create a gui to visualize the maze
+* :construction: A* Algorithms
+    * :heavy_check_mark: Forward
+    * :heavy_check_mark: Backward
+    * :x: Adaptive
 
 # I was thinking about datastructers that we could need:
 
