@@ -1,9 +1,9 @@
 
 class Node:
     # constructor
-    def __init__(self, loci, parenti=None, gi=1, hi=-1,smallG = False):
+    def __init__(self, loci, parent=None, gi=1, hi=-1, smallG = True):
         self.loc = loci
-        self.parent = parenti
+        self.parent = parent
         self.g = gi
         self.f = self.g + hi
         self.bool = smallG
@@ -15,7 +15,9 @@ class Node:
         else:
             if not self.bool:
                 return self.g > other.g
-            return  self.g < other.g
+            else:
+                return self.g < other.g
+
     def __repr__(self):
         return "loc: {}, f: {}, g: {}".format(self.loc, self.f, self.g)
 

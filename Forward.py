@@ -4,11 +4,11 @@ import numpy as np
 
 import Utility
 
-size = 101
+size = 10
 # load in a test case
 ACTUAL = np.load('Mazes/maze01.npy')
 #print(ACTUAL)
-#ACTUAL = np.full((size, size), 0, dtype=np.int8)
+ACTUAL = np.full((size, size), 0, dtype=np.int8)
 #ACTUAL[2,0] = 1
 #ACTUAL[18,19] = 1
 #ACTUAL[19,18] = 1
@@ -33,7 +33,8 @@ def createPossible(loc):
     for x in [[-1,0], [1, 0], [0,-1], [0, 1]]:
         a = np.add(loc, x)
         a = list(a)
-        if Utility.inRange(a, size) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in closed):
+        if Utility.inRange(a, size) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in closed) \
+                and not any(x.loc == a for x in openList):
             locs.append(a)
     return locs
 
@@ -74,7 +75,7 @@ def findPath(start, reverse=False):
         if current.loc == localGoal: # found goal
             foundGoal = True
             break
-
+        #print("list = {}".format(openList))
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
             # Node(location, parent, g, h)Utility.distance(start, localGoal)
