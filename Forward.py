@@ -4,11 +4,11 @@ import numpy as np
 
 import Utility
 
-size = 10
+size = 101
 # load in a test case
 ACTUAL = np.load('Mazes/maze01.npy')
 #print(ACTUAL)
-ACTUAL = np.full((size, size), 0, dtype=np.int8)
+#ACTUAL = np.full((size, size), 0, dtype=np.int8)
 #ACTUAL[2,0] = 1
 #ACTUAL[18,19] = 1
 #ACTUAL[19,18] = 1
@@ -41,30 +41,41 @@ def createPossible(loc):
 # while we have nodes to go to
 
 # print path by starting at goal
-def getPath(start, reverse):
+def getPath(start, reverse, g):
     if reverse:
         start = goal
     cur = closed[-1]
+    cur.adaptive(g)
     pathL = [cur]
     while cur.loc != start:
         cur = cur.parent
+        cur.adaptive(g)
         pathL.append(cur)
     if not reverse:
         pathL.reverse()
     return pathL
 
+
 # finds a path using A*
-def findPath(start, reverse=False):
+def findPath(start, reverse=False, adaptive=False):
+    if adaptive and reverse:
+        print("Sorry, cannot do backwards adaptive!")
+        return None
+    g = 0 # used for adaptive
     global goal
     localGoal = goal
     if reverse:
         localGoal, start = start, localGoal # reverse the values for backwards
     global openList
     if closed:
-        openList = []
-        closed[-1].g = 0
-        closed[-1].f = closed[-1].g + Utility.distance(closed[-1].loc, localGoal)
-        hpq.heappush(openList, closed[-1])
+        if adaptive: # add nodes back with new values
+            for x in closed:
+                hpq.heappush(x)
+        else:
+            openList = []
+            closed[-1].g = 0
+            closed[-1].f = closed[-1].g + Utility.distance(closed[-1].loc, localGoal)
+            hpq.heappush(openList, closed[-1])
     else:
         hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal)))
     foundGoal = False
@@ -73,6 +84,7 @@ def findPath(start, reverse=False):
         closed.append(current)  # add node to closed list
 
         if current.loc == localGoal: # found goal
+            g = current.g # get final g
             foundGoal = True
             break
         #print("list = {}".format(openList))
@@ -83,9 +95,11 @@ def findPath(start, reverse=False):
             hpq.heappush(openList, node) # add it to binary heap
 
     if foundGoal:
-        return getPath(start, reverse)
+        return getPath(start, reverse, g)
     else:
         return []
+
+
 
 # move agent and remove fog of war
 def moveAgent(path):

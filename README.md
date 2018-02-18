@@ -8,7 +8,7 @@ Using A*, we solve randomized mazes
 * :construction: A* Algorithms
     * :heavy_check_mark: Forward
     * :heavy_check_mark: Backward
-    * :x: Adaptive
+    * :construction: Adaptive
 
 # I was thinking about datastructers that we could need:
 
