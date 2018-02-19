@@ -1,3 +1,4 @@
+import Forward as f
 
 class Node:
     # constructor
@@ -20,14 +21,23 @@ class Node:
                 return self.g < other.g
 
     def adaptive(self, g):
-        self.h += g
-        self.f += g # difference between new and old f is g
+        self.h = g - self.g
+        self.f = self.g + self.h # difference between new and old f is g
+
+    def updateG(self, g=0):
+        self.g = g
+        self.f = self.g + self.h
 
     def __repr__(self):
         return "loc: {}, f: {}, g: {}".format(self.loc, self.f, self.g)
 
 def distance(curPos, goal):
-    return abs(curPos[0] - goal[0]) + abs(curPos[1] - goal[1])
+    item = next((x for x in f.closed if x.loc == curPos), 0)
+    if item: # get distance from last time and remove it from closed
+        f.closed.remove(item)
+        return item.h
+    else:
+        return abs(curPos[0] - goal[0]) + abs(curPos[1] - goal[1])
 
 
 def inRange(loc, size=100):

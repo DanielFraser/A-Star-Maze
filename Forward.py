@@ -6,12 +6,8 @@ import Utility
 
 size = 101
 # load in a test case
-ACTUAL = np.load('Mazes/maze01.npy')
-#print(ACTUAL)
+ACTUAL = np.load('Mazes/maze12.npy')
 #ACTUAL = np.full((size, size), 0, dtype=np.int8)
-#ACTUAL[2,0] = 1
-#ACTUAL[18,19] = 1
-#ACTUAL[19,18] = 1
 # create blank board
 currentMap = np.full((size, size), 0, dtype=np.int8)
 openList = []
@@ -23,19 +19,24 @@ def updateMap(loc):
     for x in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
         a = np.add(loc, x)
         a = list(a)
+        #print(a)
         if (Utility.inRange(a, size)):
             currentMap[a[0], a[1]] = ACTUAL[a[0], a[1]]
 
 # expands each node around current and makes sure we haven't been
 # there or isn't blocked
-def createPossible(loc):
+def createPossible(loc, adaptive=False):
     locs = []
     for x in [[-1,0], [1, 0], [0,-1], [0, 1]]:
         a = np.add(loc, x)
         a = list(a)
-        if Utility.inRange(a, size) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in closed) \
-                and not any(x.loc == a for x in openList):
-            locs.append(a)
+        if not adaptive:
+            if Utility.inRange(a, size) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in closed) \
+                    and not any(x.loc == a for x in openList):
+                locs.append(a)
+        else:
+            if Utility.inRange(a, size) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in openList):
+                locs.append(a)
     return locs
 
 # while we have nodes to go to
@@ -45,11 +46,12 @@ def getPath(start, reverse, g):
     if reverse:
         start = goal
     cur = closed[-1]
-    cur.adaptive(g)
+    if g:
+        for c in closed:
+            c.adaptive(g)
     pathL = [cur]
     while cur.loc != start:
         cur = cur.parent
-        cur.adaptive(g)
         pathL.append(cur)
     if not reverse:
         pathL.reverse()
@@ -69,8 +71,10 @@ def findPath(start, reverse=False, adaptive=False):
     global openList
     if closed:
         if adaptive: # add nodes back with new values
-            for x in closed:
-                hpq.heappush(x)
+            item = next((x for x in closed if x.loc == agent), 0)
+            item.updateG() #
+            openList = []
+            hpq.heappush(item)
         else:
             openList = []
             closed[-1].g = 0
@@ -102,7 +106,7 @@ def findPath(start, reverse=False, adaptive=False):
 
 
 # move agent and remove fog of war
-def moveAgent(path):
+def moveAgent(path, adaptive=False):
     for y,x in enumerate(path):
         x = x.loc
         global finalPath
@@ -114,7 +118,10 @@ def moveAgent(path):
         else:
             finalPath = finalPath[:-1]
             global closed
-            closed = [path[y-1]] # get rid of unused items in closed list
+            if not adaptive: # keep items in list for adaptive to refer back later
+                closed = [path[y-1]] # get rid of unused items in closed list
+            else:
+                closed.remove(x) # we know this tile will never be reached
             break
 
 # main method
@@ -135,5 +142,6 @@ if __name__ == '__main__':
 
     if finalPath:
         print("Final path = {}".format(finalPath))
+    #ui.gui(currentMap)
 
 # need backtracking and updating g values
