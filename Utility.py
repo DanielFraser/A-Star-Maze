@@ -2,7 +2,7 @@ import Forward as f
 
 class Node:
     # constructor
-    def __init__(self, loci, parent=None, gi=1, hi=-1, smallG = False):
+    def __init__(self, loci, parent=None, gi=0, hi=0, smallG = False):
         self.loc = loci
         self.parent = parent
         self.g = gi
