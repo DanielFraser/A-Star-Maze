@@ -31,7 +31,7 @@ def updateMap(loc):
 
 # expands each node around current and makes sure we haven't been
 # there or isn't blocked
-def createPossible(loc):
+def createPossible(loc, adaptive=False):
     locs = []
     for x in [[-1,0], [1, 0], [0,-1], [0, 1]]:
         a = np.add(loc, x)
@@ -44,10 +44,13 @@ def createPossible(loc):
 # while we have nodes to go to
 
 # print path by starting at goal
-def getPath(start, reverse, current):
+def getPath(start, reverse, g, current):
     if reverse:
         start = goal
     cur = current
+    if g:
+        global closed
+        closed = {x: g - y for x, y in closed.items()}
     pathL = [cur.loc]
     while cur.loc != start:
         cur = cur.parent
@@ -58,14 +61,18 @@ def getPath(start, reverse, current):
 
 
 # finds a path using A*
-def findPath(start, reverse=False):
+def findPath(start, reverse=False, adaptive=False):
+    if adaptive and reverse:
+        print("Sorry, cannot do backwards adaptive!")
+        return None
+    g = 0 # used for adaptive
     global goal
     localGoal = goal
     if reverse:
         localGoal, start = start, localGoal # reverse the values for backwards
     global openList
     global closed
-    if closed:
+    if closed and not adaptive:
         openList = []
         hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, localGoal)))
     else:
@@ -77,6 +84,8 @@ def findPath(start, reverse=False):
         closed[str(current.loc)] = current.g  # add node to closed list
 
         if current.loc == localGoal: # found goal
+            if adaptive:
+                g = current.g  # get final g
             foundGoal = True
             break
 
@@ -86,17 +95,21 @@ def findPath(start, reverse=False):
 
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
-            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal))
-            hpq.heappush(openList, node) # add it to binary heap
+            if adaptive:
+                node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal, closed))
+                hpq.heappush(openList, node)  # add it to binary heap
+            else:
+                node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal))
+                hpq.heappush(openList, node) # add it to binary heap
 
     if foundGoal:
-        return getPath(start, reverse, current)
+        return getPath(start, reverse, g, current)
     else:
         return []
 
 
 # move agent and remove fog of war
-def moveAgent(path):
+def moveAgent(path, adaptive=False):
     for y,x in enumerate(path):
         global finalPath
         if currentMap[x[0], x[1]] == 0:
@@ -106,8 +119,9 @@ def moveAgent(path):
             finalPath.append(x)
         else:
             finalPath = finalPath[:-1]
-            closed.clear()
-            closed[str(path[y-1])] = 0
+            if not adaptive:
+                closed.clear()
+                closed[str(path[y-1])] = 0
             break
 
 # main method TODO later

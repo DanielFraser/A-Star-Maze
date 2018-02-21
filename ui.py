@@ -1,11 +1,11 @@
 from tkinter import *
 
 
-def gui(currentMap):
+def gui(currentMap, size, start, goal):
     unblocked_points = list()
     blocked_points = list()
-    width = 101
-    height = 101
+    width = size
+    height = size
     root = Tk()
     w = Canvas(root, width=width * 7, height=height * 7)
     cell_x, cell_y = 0, 0
@@ -27,8 +27,14 @@ def gui(currentMap):
             if currentMap[round(y / 7)][round(x / 7)] == 0:
                 single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='green')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
-            if currentMap[round(y / 7)][round(x / 7)] == 1:
+            elif currentMap[round(y / 7)][round(x / 7)] == 1:
                 single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='purple')
+                w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
+            if [round(y / 7), round(x / 7)] == start:
+                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='yellow')
+                w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
+            elif [round(y / 7), round(x / 7)] == goal:
+                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='red')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
 
     lab = Label(root, textvariable=topLine)

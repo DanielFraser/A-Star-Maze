@@ -1,5 +1,3 @@
-import Forward as f
-
 class Node:
     # constructor
     def __init__(self, loci, parent=None, gi=0, hi=0, smallG = False):
@@ -29,13 +27,12 @@ class Node:
         self.f = self.g + self.h
 
     def __repr__(self):
-        return "loc: {}, f: {}, g: {}".format(self.loc, self.f, self.g)
+        return "(loc: {}, f: {}, g: {})".format(self.loc, self.f, self.g)
 
-def distance(curPos, goal):
-    item = next((x for x in f.closed if x.loc == curPos), 0)
-    if item: # get distance from last time and remove it from closed
-        f.closed.remove(item)
-        return item.h
+
+def distance(curPos, goal, closed=[]):
+    if str(curPos) in closed: # get distance from last time and remove it from closed
+        return closed[str(curPos)] # return previous h value (g(goal) - g(initial))
     else:
         return abs(curPos[0] - goal[0]) + abs(curPos[1] - goal[1])
 
