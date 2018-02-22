@@ -3,6 +3,7 @@ from datetime import datetime
 
 import numpy as np
 
+import Adaptive as A
 import Utility
 
 startTime = datetime.now()
@@ -10,15 +11,15 @@ startTime = datetime.now()
 
 
 # load in a test case
-#ACTUAL = np.load('Mazes/maze01.npy')
+ACTUAL = np.load('Mazes/maze01.npy')
 
-ACTUAL = np.full((5, 5), 0, dtype=np.int8)
-ACTUAL[1, 2] = 1
-ACTUAL[2, 2] = 1
-ACTUAL[3, 2] = 1
-ACTUAL[2, 3] = 1
-ACTUAL[3, 3] = 1
-ACTUAL[4, 3] = 1
+# ACTUAL = np.full((5, 5), 0, dtype=np.int8)
+# ACTUAL[1, 2] = 1
+# ACTUAL[2, 2] = 1
+# ACTUAL[3, 2] = 1
+# ACTUAL[2, 3] = 1
+# ACTUAL[3, 3] = 1
+# ACTUAL[4, 3] = 1
 # create blank board
 size = len(ACTUAL[0])
 currentMap = np.full((size, size), 0, dtype=np.int8)
@@ -53,7 +54,7 @@ def createPossible(loc):
 # print path by starting at goal
 def getPath(start, reverse, current):
     if reverse:
-        start = goal
+        start = GOAL
     cur = current
     pathL = [cur.loc]
     while cur.loc != start:
@@ -66,8 +67,8 @@ def getPath(start, reverse, current):
 
 # finds a path using A*
 def findPath(start, reverse=False):
-    global goal
-    localGoal = goal
+    global GOAL
+    localGoal = GOAL
     if reverse:
         localGoal, start = start, localGoal # reverse the values for backwards
     global openList
@@ -118,28 +119,43 @@ def moveAgent(path):
             break
 
 # main method TODO later
-def AStar(start, goal, name, reverse, adaptive):
-    a=0
+def AStar(name, start = [0, 0], goal = [100, 100], reverse=False, adaptive=False):
+    mapA = np.load(name)
 
-# main method
-if __name__ == '__main__':
-    start = [0, 0]
-    goal = [size - 1, size - 1]
+    if adaptive and reverse:
+        print("can't do it!")
+    elif adaptive and not reverse:
+        A.Start(start, goal, mapA)
+    else:
+        Start(start, goal, mapA, reverse)
+
+def Start(start, goal, mapA, reverse):
+    global size
+    size = len(mapA)
+    global ACTUAL
+    ACTUAL = mapA
+    global finalPath
+    global GOAL
+    GOAL = goal
+    global agent
     agent = start
     updateMap(agent)  # remove fog of war
     while agent != goal:
-        path = findPath(agent) # get path (need to create one for reverse)
-        if path:    # if there is a path, move agent
+        path = findPath(agent, reverse)  # get path (need to create one for reverse)
+        if path:  # if there is a path, move agent
             moveAgent(path)
-        else:   # no path, unable to get to goal
+        else:  # no path, unable to get to goal
             finalPath = []
             print("No path found")
             break
 
     if finalPath:
         print("Final path = {}".format(finalPath))
-    #ui.gui(currentMap)
+    # ui.gui(currentMap)
     print("nodes = {}".format(nodes))
     print(datetime.now() - startTime)
 
-#
+# main method
+if __name__ == '__main__':
+    AStar('Mazes/special.npy', [4,2], [4,4], adaptive=True)
+    AStar('Mazes/special.npy', [4, 2], [4, 4])

@@ -5,34 +5,22 @@ import numpy as np
 
 import Utility
 
-startTime = datetime.now()
-# redo closed list
-
-size = 5
-# load in a test case
-#ACTUAL = np.load('Mazes/maze01.npy')
-ACTUAL = np.full((5, 5), 0, dtype=np.int8)
-ACTUAL[1, 2] = 1
-ACTUAL[2, 2] = 1
-ACTUAL[3, 2] = 1
-ACTUAL[2, 3] = 1
-ACTUAL[3, 3] = 1
-ACTUAL[4, 3] = 1
-#ACTUAL = np.full((size, size), 0, dtype=np.int8)
-# create blank board
-currentMap = np.full((size, size), 0, dtype=np.int8)
+SIZE = 101
+GOAL = [100, 100]
+currentMap = []
 openList = []
 closed = dict() # always empty at start
 curPath = []
 finalPath = []
 nodes = 0
+start = [0, 0]
 
 # updates map before planning route
 def updateMap(loc):
     for x in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
         a = np.add(loc, x)
         a = list(a)
-        if Utility.inRange(a, size):
+        if Utility.inRange(a, SIZE):
             currentMap[a[0], a[1]] = ACTUAL[a[0], a[1]]
 
 
@@ -43,7 +31,7 @@ def createPossible(loc):
     for x in [[-1,0], [1, 0], [0,-1], [0, 1]]:
         a = np.add(loc, x)
         a = list(a)
-        if Utility.inRange(a, size) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in openList) \
+        if Utility.inRange(a, SIZE) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in openList) \
                 and a not in curPath:
                 locs.append(a)
     return locs
@@ -70,13 +58,13 @@ def findPath(start):
     global openList
     global closed
     openList = []
-    hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, goal)))
+    hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, GOAL)))
 
     foundGoal = False
     current = None
     while openList:
         current = hpq.heappop(openList) # get next best position
-        if current.loc == goal: # found goal
+        if current.loc == GOAL: # found goal
             g = current.g  # get final g
             foundGoal = True
             break
@@ -90,7 +78,7 @@ def findPath(start):
 
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
-            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, goal, closed))
+            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, GOAL, closed))
             hpq.heappush(openList, node)  # add it to binary heap
 
     if foundGoal:
@@ -114,25 +102,31 @@ def moveAgent(path):
             curPath = [path[y-1]] # reset current path
             break
 
-# main method
-if __name__ == '__main__':
-    start = [0, 0]
-    goal = [size - 1, size - 1]
-    agent = start
+def Start(start2, goal2, mapA):
+    startTime = datetime.now()
+    global SIZE
+    SIZE = len(mapA)
+    global GOAL
+    GOAL = goal2
+    global ACTUAL
+    ACTUAL = mapA
+    global currentMap
+    currentMap = np.full((SIZE, SIZE), 0, dtype=np.int8) # initialize map
+    global finalPath
+    global agent
+    agent = start2
     updateMap(agent)  # remove fog of war
-    while agent != goal:
-        path = findPath(agent) # get path (need to create one for reverse)
-        if path:    # if there is a path, move agent
+    while agent != GOAL:
+        path = findPath(agent)  # get path (need to create one for reverse)
+        if path:  # if there is a path, move agent
             moveAgent(path)
-        else:   # no path, unable to get to goal
+        else:  # no path, unable to get to goal
             finalPath = []
             print("No path found")
             break
-    print(closed)
+
     if finalPath:
         print("Final path = {}".format(finalPath))
-    #ui.gui(currentMap)
+    # ui.gui(currentMap)
     print("nodes = {}".format(nodes))
     print(datetime.now() - startTime)
-
-#
