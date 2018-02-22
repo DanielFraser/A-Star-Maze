@@ -10,10 +10,17 @@ startTime = datetime.now()
 
 
 # load in a test case
-ACTUAL = np.load('Mazes/maze01.npy')
-size = len(ACTUAL[0])
-#ACTUAL = np.full((size, size), 0, dtype=np.int8)
+#ACTUAL = np.load('Mazes/maze01.npy')
+
+ACTUAL = np.full((5, 5), 0, dtype=np.int8)
+ACTUAL[1, 2] = 1
+ACTUAL[2, 2] = 1
+ACTUAL[3, 2] = 1
+ACTUAL[2, 3] = 1
+ACTUAL[3, 3] = 1
+ACTUAL[4, 3] = 1
 # create blank board
+size = len(ACTUAL[0])
 currentMap = np.full((size, size), 0, dtype=np.int8)
 openList = []
 closed = dict() # always empty at start
@@ -128,10 +135,11 @@ if __name__ == '__main__':
             finalPath = []
             print("No path found")
             break
-    print(closed)
+
     if finalPath:
         print("Final path = {}".format(finalPath))
     #ui.gui(currentMap)
+    print("nodes = {}".format(nodes))
     print(datetime.now() - startTime)
 
 #
