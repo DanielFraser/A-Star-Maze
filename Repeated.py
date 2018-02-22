@@ -12,21 +12,10 @@ startTime = datetime.now()
 
 # load in a test case
 ACTUAL = np.load('Mazes/maze01.npy')
-
-# ACTUAL = np.full((5, 5), 0, dtype=np.int8)
-# ACTUAL[1, 2] = 1
-# ACTUAL[2, 2] = 1
-# ACTUAL[3, 2] = 1
-# ACTUAL[2, 3] = 1
-# ACTUAL[3, 3] = 1
-# ACTUAL[4, 3] = 1
-# create blank board
+gSize = False
 size = len(ACTUAL[0])
 currentMap = np.full((size, size), 0, dtype=np.int8)
-openList = []
-closed = dict() # always empty at start
-finalPath = []
-nodes = 0
+
 
 # updates map before planning route
 def updateMap(loc):
@@ -39,7 +28,7 @@ def updateMap(loc):
 
 # expands each node around current and makes sure we haven't been
 # there or isn't blocked
-def createPossible(loc):
+def createPossible(loc, closed, openList):
     locs = []
     for x in [[-1,0], [1, 0], [0,-1], [0, 1]]:
         a = np.add(loc, x)
@@ -66,18 +55,17 @@ def getPath(start, reverse, current):
 
 
 # finds a path using A*
-def findPath(start, reverse=False):
+def findPath(start, closed, openList, reverse=False):
+    nodes = 0
     global GOAL
     localGoal = GOAL
     if reverse:
         localGoal, start = start, localGoal # reverse the values for backwards
-    global openList
-    global closed
     if closed:
         openList = []
-        hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, localGoal)))
+        hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, localGoal), smallG=gSize))
     else:
-        hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal)))
+        hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal), smallG=gSize))
     foundGoal = False
     current = None
     while openList:
@@ -89,24 +77,22 @@ def findPath(start, reverse=False):
             break
 
         # print(current)
-        global nodes
         nodes += 1
 
-        possibleMoves = createPossible(current.loc)  # get list of all possible nodes
+        possibleMoves = createPossible(current.loc, closed, openList)  # get list of all possible nodes
         for x in possibleMoves:
-            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal))
+            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal), smallG=gSize)
             hpq.heappush(openList, node) # add it to binary heap
 
     if foundGoal:
-        return getPath(start, reverse, current)
+        return getPath(start, reverse, current), nodes
     else:
-        return []
+        return [], nodes
 
 
 # move agent and remove fog of war
-def moveAgent(path):
+def moveAgent(path, closed, finalPath):
     for y,x in enumerate(path):
-        global finalPath
         if currentMap[x[0], x[1]] == 0:
             updateMap(x)  # remove fog of war
             global agent
@@ -119,43 +105,47 @@ def moveAgent(path):
             break
 
 # main method TODO later
-def AStar(name, start = [0, 0], goal = [100, 100], reverse=False, adaptive=False):
+def AStar(name, start = [0, 0], goal = [100, 100], reverse=False, adaptive=False, smallG = False):
     mapA = np.load(name)
-
     if adaptive and reverse:
         print("can't do it!")
     elif adaptive and not reverse:
         A.Start(start, goal, mapA)
     else:
-        Start(start, goal, mapA, reverse)
+        return Start(start, goal, mapA, reverse, smallG)
 
-def Start(start, goal, mapA, reverse):
+def Start(start, goal, mapA, reverse, smallG):
+    openList = []
+    closed = dict()  # always empty at start
+    finalPath = []
+    nodes = 0
+    global gSize
+    gSize = smallG
     global size
     size = len(mapA)
     global ACTUAL
     ACTUAL = mapA
-    global finalPath
     global GOAL
     GOAL = goal
     global agent
     agent = start
     updateMap(agent)  # remove fog of war
     while agent != goal:
-        path = findPath(agent, reverse)  # get path (need to create one for reverse)
+        path, nodesT = findPath(agent, closed, openList, reverse)  # get path (need to create one for reverse)
+        nodes += nodesT
         if path:  # if there is a path, move agent
-            moveAgent(path)
+            moveAgent(path, closed, finalPath)
         else:  # no path, unable to get to goal
             finalPath = []
             print("No path found")
             break
 
-    if finalPath:
-        print("Final path = {}".format(finalPath))
+    # if finalPath:
+    #     print("Final path = {}".format(finalPath))
     # ui.gui(currentMap)
-    print("nodes = {}".format(nodes))
-    print(datetime.now() - startTime)
+    return [nodes, datetime.now() - startTime]
 
-# main method
-if __name__ == '__main__':
-    AStar('Mazes/special.npy', [4,2], [4,4], adaptive=True)
-    AStar('Mazes/special.npy', [4, 2], [4, 4])
+# # main method
+# if __name__ == '__main__':
+#     AStar('Mazes/special.npy', [4,2], [4,4], adaptive=True)
+#     AStar('Mazes/special.npy', [4, 2], [4, 4])
