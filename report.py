@@ -1,6 +1,8 @@
 import Repeated as R
 # will hold results for report
 # TODO fix bug where variables don't reset their values when run past first time
+# TODO add a 2nd for loop inside the maze loops to get avg times for both cases
+# TODO multithreading?
 # g values big vs small
 
 
@@ -44,5 +46,5 @@ def part5():
 
 if __name__ == '__main__':
     part2()
-    part3()
-    part5()
+    #part3()
+    #part5()
