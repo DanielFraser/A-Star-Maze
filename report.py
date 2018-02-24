@@ -2,6 +2,8 @@ from datetime import datetime
 import ui
 import Repeated as R
 import numpy as np
+import sys
+import Utility as u
 import MazeCreator as mc
 from random import randrange as rd
 
@@ -26,6 +28,7 @@ def createStates():
             a = R.AStar(y, start, goal, adaptive=True)
             isPath = a[2]
         states.append([start,goal])
+        print(x)
 
 def part2():
     smallg = []
@@ -65,7 +68,7 @@ def part3():
         state[1] = list(state[1])
         ftemp = [0, datetime.now()]
         rtemp = [0, datetime.now()]
-        for z in range(10): # so we get avg time
+        for _ in range(10): # so we get avg time
             y = "Mazes/maze{}.npy".format(str(x).zfill(2))
             a = R.AStar(y, state[0], state[1], reverse=False)
             ftemp[0] += a[0]
@@ -73,40 +76,41 @@ def part3():
             b = R.AStar(y, state[0], state[1], reverse=True)
             rtemp[0] += b[0]
             rtemp[1] += b[1]
-            print(z)
-        forward.append(ftemp[0]/10)
-        forward.append((ftemp[1] - start)/2)
-        reverse.append(rtemp[0]/10)
-        reverse.append((rtemp[1] - start)/2)
+            print('b')
+
+        forward.append([round(ftemp[0]/10), (ftemp[1] - start)/2])
+        reverse.append([round(rtemp[0] / 10), (rtemp[1] - start) / 2])
         print(y)
     print(forward)
     print(reverse)
 
+
 # forward vs adaptive
-def part5(start=0,end=50):
+def part5(end=50, start=0):
     forward = []
     adaptive = []
     for x in range(start,end):  # goes through all 50 mazes
+        y = "Mazes/maze{}.npy".format(str(x).zfill(2))
+        start = datetime.now()
+        state = states[x]
+        state = list(state)
+        state[0] = list(state[0])
+        state[1] = list(state[1])
         ftemp = [0, datetime.now()]
         rtemp = [0, datetime.now()]
-        state = [[0, 0], [100, 100]]
-        if x in states:
-            state = states[x]
         for _ in range(10):
-            y = "Mazes/maze{}.npy".format(str(x).zfill(2))
             a = R.AStar(y, state[0], state[1], adaptive=False)
             ftemp[0] += a[0]
             ftemp[1] += a[1]
             b = R.AStar(y, state[0], state[1], adaptive=True)
             rtemp[0] += b[0]
             rtemp[1] += b[1]
+            print('b')
         print(y)
-    forward.append(ftemp[0] / 10)
-    forward.append(ftemp[1])
-    adaptive.append(rtemp[0] / 10)
-    adaptive.append(rtemp[1])
-    # print(forward[1][1])
-    # print(adaptive[1][1])
+        forward.append([round(ftemp[0] / 10), (ftemp[1] - start) / 2])
+        adaptive.append([round(rtemp[0] / 10), (rtemp[1] - start) / 2])
+    print("{} vs {}".format(forward[0][0], adaptive[0][0]))
+    print("{} vs {}".format(forward[1][0], adaptive[1][0]))
 
 def printMaze():
     for x in range(50):  # goes through all 50 mazes
@@ -122,13 +126,14 @@ def testforpath(num=0):
     ui.gui(np.load(y), 101, state[0], state[1], a[3])
 
 if __name__ == '__main__':
-    #createStates()
-    #np.save('works', states)
-    a = np.load('works.npy')
-    states = a
+    createStates()
+    np.save('works', states)
+    # a = np.load('works.npy')
+    # states = a
+    # print(a)
     # printMaze()
     # part2()
-    part3()
-    # part5(0,1)
+    # part3()
+    # part5(2)
     #testforpath(0)
     #mc.redoMaze(4)

@@ -1,7 +1,7 @@
 from tkinter import *
 
 
-def gui(currentMap, size, start, goal):
+def gui(currentMap, size, start, goal, path):
     unblocked_points = list()
     blocked_points = list()
     width = size
@@ -25,17 +25,22 @@ def gui(currentMap, size, start, goal):
         for y in range(0, height * 7, 7):
             #print("{},{} = {}".format(x/7, y/7, currentMap[round(x / 7), round(y / 7)]))
             if currentMap[round(y / 7)][round(x / 7)] == 0:
-                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='green')
+                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='white')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
             elif currentMap[round(y / 7)][round(x / 7)] == 1:
-                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='purple')
+                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='black')
+                w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
+            if [round(y / 7), round(x / 7)] in path:
+                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='blue')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
             if [round(y / 7), round(x / 7)] == start:
-                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='yellow')
+                single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='green')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
             elif [round(y / 7), round(x / 7)] == goal:
                 single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='red')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
+
+
 
     lab = Label(root, textvariable=topLine)
     lab.pack()

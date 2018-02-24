@@ -1,8 +1,7 @@
 import heapq as hpq
 from datetime import datetime
-
 import numpy as np
-
+import ui
 import Utility
 
 SIZE = 101
@@ -13,6 +12,7 @@ curPath = []
 finalPath = []
 nodes = 0
 start = [0, 0]
+maxSize = 0
 
 # updates map before planning route
 def updateMap(loc):
@@ -27,6 +27,7 @@ def updateMap(loc):
 # there or isn't blocked
 def createPossible(loc):
     locs = []
+    global openList
     for x in [[-1,0], [1, 0], [0,-1], [0, 1]]:
         a = np.add(loc, x)
         a = list(a)
@@ -87,6 +88,7 @@ def findPath(start):
 
 # move agent and remove fog of war
 def moveAgent(path):
+    global finalPath
     for y,x in enumerate(path):
         global finalPath
         if currentMap[x[0], x[1]] == 0:
@@ -100,30 +102,32 @@ def moveAgent(path):
             curPath = [path[y-1]] # reset current path
             break
 
-def Start(start2, goal2, mapA):
+def Start(start, goal, mapA):
     startTime = datetime.now()
-    global SIZE
-    SIZE = len(mapA)
-    global GOAL
-    GOAL = goal2
+    global size
+    size = len(mapA)
     global currentMap
-    currentMap = mapA
-    global finalPath
+    currentMap = mapA + 2
+    global GOAL
+    GOAL = goal
     global agent
-    agent = start2
+    agent = start
     updateMap(agent)  # remove fog of war
-    while agent != GOAL:
+    global nodes
+    nodes = 0
+    global finalPath
+    while agent != goal:
         path = findPath(agent)  # get path (need to create one for reverse)
+        # print(path)
         if path:  # if there is a path, move agent
             moveAgent(path)
         else:  # no path, unable to get to goal
             finalPath = []
             #print("No path found")
             break
+
     closed.clear()
-    global curPath
-    curPath = []
     # if finalPath:
     #     print("Final path = {}".format(finalPath))
-    # ui.gui(currentMap)
-    return [nodes, datetime.now() - startTime]
+    # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
+    return [nodes, datetime.now() - startTime,bool(finalPath)]
