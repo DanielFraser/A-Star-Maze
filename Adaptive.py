@@ -7,7 +7,6 @@ import Utility
 
 SIZE = 101
 GOAL = [100, 100]
-currentMap = []
 openList = []
 closed = dict() # always empty at start
 curPath = []
@@ -21,7 +20,7 @@ def updateMap(loc):
         a = np.add(loc, x)
         a = list(a)
         if Utility.inRange(a, SIZE):
-            currentMap[a[0], a[1]] = ACTUAL[a[0], a[1]]
+            currentMap[a[0], a[1]] = currentMap[a[0], a[1]] % 2
 
 
 # expands each node around current and makes sure we haven't been
@@ -59,7 +58,6 @@ def findPath(start):
     global closed
     openList = []
     hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, GOAL)))
-
     foundGoal = False
     current = None
     while openList:
@@ -108,10 +106,8 @@ def Start(start2, goal2, mapA):
     SIZE = len(mapA)
     global GOAL
     GOAL = goal2
-    global ACTUAL
-    ACTUAL = mapA
     global currentMap
-    currentMap = np.full((SIZE, SIZE), 0, dtype=np.int8) # initialize map
+    currentMap = mapA
     global finalPath
     global agent
     agent = start2
@@ -122,11 +118,12 @@ def Start(start2, goal2, mapA):
             moveAgent(path)
         else:  # no path, unable to get to goal
             finalPath = []
-            print("No path found")
+            #print("No path found")
             break
-
-    if finalPath:
-        print("Final path = {}".format(finalPath))
+    closed.clear()
+    global curPath
+    curPath = []
+    # if finalPath:
+    #     print("Final path = {}".format(finalPath))
     # ui.gui(currentMap)
-    print("nodes = {}".format(nodes))
-    print(datetime.now() - startTime)
+    return [nodes, datetime.now() - startTime]

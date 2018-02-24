@@ -6,14 +6,12 @@ import numpy as np
 import Adaptive as A
 import Utility
 
-startTime = datetime.now()
 # redo closed list
 
 
 # load in a test case
-ACTUAL = np.load('Mazes/maze01.npy')
 gSize = False
-size = len(ACTUAL[0])
+size = 101
 currentMap = np.full((size, size), 0, dtype=np.int8)
 
 
@@ -23,7 +21,7 @@ def updateMap(loc):
         a = np.add(loc, x)
         a = list(a)
         if Utility.inRange(a, size):
-            currentMap[a[0], a[1]] = ACTUAL[a[0], a[1]]
+            currentMap[a[0], a[1]] = currentMap[a[0], a[1]] % 2
 
 
 # expands each node around current and makes sure we haven't been
@@ -55,14 +53,14 @@ def getPath(start, reverse, current):
 
 
 # finds a path using A*
-def findPath(start, closed, openList, reverse=False):
+def findPath(start, closed, reverse=False):
     nodes = 0
     global GOAL
     localGoal = GOAL
     if reverse:
         localGoal, start = start, localGoal # reverse the values for backwards
+    openList = []
     if closed:
-        openList = []
         hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, localGoal), smallG=gSize))
     else:
         hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal), smallG=gSize))
@@ -70,7 +68,7 @@ def findPath(start, closed, openList, reverse=False):
     current = None
     while openList:
         current = hpq.heappop(openList) # get next best position
-        closed[str(current.loc)] = current.g  # add node to closed list
+        closed.add(str(current.loc))  # add node to closed list
 
         if current.loc == localGoal: # found goal
             foundGoal = True
@@ -93,55 +91,55 @@ def findPath(start, closed, openList, reverse=False):
 # move agent and remove fog of war
 def moveAgent(path, closed, finalPath):
     for y,x in enumerate(path):
-        if currentMap[x[0], x[1]] == 0:
+        if currentMap[x[0], x[1]] != 1:  # only move to known free or unknown
             updateMap(x)  # remove fog of war
             global agent
             agent = x
             finalPath.append(x)
         else:
-            finalPath = finalPath[:-1]
             closed.clear()
-            closed[str(path[y-1])] = 0
             break
 
-# main method TODO later
+
 def AStar(name, start = [0, 0], goal = [100, 100], reverse=False, adaptive=False, smallG = False):
     mapA = np.load(name)
     if adaptive and reverse:
         print("can't do it!")
     elif adaptive and not reverse:
-        A.Start(start, goal, mapA)
+        return A.Start(start, goal, mapA)
     else:
         return Start(start, goal, mapA, reverse, smallG)
 
 def Start(start, goal, mapA, reverse, smallG):
-    openList = []
-    closed = dict()  # always empty at start
+    startTime = datetime.now()
+    closed = set()  # always empty at start
     finalPath = []
-    nodes = 0
     global gSize
     gSize = smallG
     global size
     size = len(mapA)
-    global ACTUAL
-    ACTUAL = mapA
+    global currentMap
+    currentMap = mapA + 2
     global GOAL
     GOAL = goal
     global agent
     agent = start
     updateMap(agent)  # remove fog of war
+    nodes = 0
     while agent != goal:
-        path, nodesT = findPath(agent, closed, openList, reverse)  # get path (need to create one for reverse)
+        path, nodesT = findPath(agent, closed, reverse)  # get path (need to create one for reverse)
         nodes += nodesT
         if path:  # if there is a path, move agent
             moveAgent(path, closed, finalPath)
         else:  # no path, unable to get to goal
             finalPath = []
-            print("No path found")
+            #print("No path found")
             break
+        finalPath = finalPath[:-1]
 
-    # if finalPath:
-    #     print("Final path = {}".format(finalPath))
+    closed.clear()
+    if finalPath:
+        print("Final path = {}".format(finalPath))
     # ui.gui(currentMap)
     return [nodes, datetime.now() - startTime]
 
