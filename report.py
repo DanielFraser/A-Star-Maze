@@ -7,7 +7,7 @@ import Repeated as R
 # TODO multithreading? (can't do much)
 # g values big vs small
 states = dict() # will hold special start and end goals for certain mazes
-states[0] = [[0,0][100,100]]
+states[0] = [[0,0],[100,100]]
 
 def part2():
     smallg = []
