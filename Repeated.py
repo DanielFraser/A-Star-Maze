@@ -133,13 +133,13 @@ def Start(start, goal, mapA, reverse, smallG):
             moveAgent(path, closed, finalPath)
         else:  # no path, unable to get to goal
             finalPath = []
-            #print("No path found")
+            print("No path found")
             break
         finalPath = finalPath[:-1]
 
     closed.clear()
-    if finalPath:
-        print("Final path = {}".format(finalPath))
+    # if finalPath:
+    #     print("Final path = {}".format(finalPath))
     # ui.gui(currentMap)
     return [nodes, datetime.now() - startTime]
 
