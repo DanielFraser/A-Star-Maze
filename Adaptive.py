@@ -1,18 +1,18 @@
 import heapq as hpq
 from datetime import datetime
+
 import numpy as np
-import ui
+
 import Utility
+import ui
 
 SIZE = 101
 GOAL = [100, 100]
 openList = []
-closed = dict() # always empty at start
-curPath = []
+knowledge = dict() # always empty at start
+closed = []
 finalPath = []
 nodes = 0
-start = [0, 0]
-maxSize = 0
 
 # updates map before planning route
 def updateMap(loc):
@@ -32,7 +32,7 @@ def createPossible(loc):
         a = np.add(loc, x)
         a = list(a)
         if Utility.inRange(a, SIZE) and currentMap[a[0], a[1]] != 1 and not any(x.loc == a for x in openList) \
-                and a not in curPath:
+                and a not in closed:
                 locs.append(a)
     return locs
 
@@ -40,14 +40,13 @@ def createPossible(loc):
 
 # print path by starting at goal
 def getPath(start, g, current):
-    cur = current
-    global closed
-    for x in curPath: # only update ones we went to
-        closed[str(x)] = g - closed[str(x)]
-    pathL = [cur.loc]
-    while cur.loc != start:
-        cur = cur.parent
-        pathL.append(cur.loc)
+    global knowledge
+    for x in closed: # only update ones we went to
+        knowledge[str(x)] = g - knowledge[str(x)]
+    pathL = [current.loc]
+    while current.loc != start:
+        current = current.parent
+        pathL.append(current.loc)
     pathL.reverse()
     return pathL
 
@@ -56,7 +55,7 @@ def getPath(start, g, current):
 def findPath(start):
     g = 0 # used for adaptive
     global openList
-    global closed
+    global knowledge
     openList = []
     hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, GOAL)))
     foundGoal = False
@@ -68,8 +67,8 @@ def findPath(start):
             foundGoal = True
             break
 
-        closed[str(current.loc)] = current.g  # add node to closed list
-        curPath.append(current.loc)
+        knowledge[str(current.loc)] = current.g  # add node to knowledge list
+        closed.append(current.loc)
 
         #print(current)
         global nodes
@@ -77,7 +76,7 @@ def findPath(start):
 
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
-            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, GOAL, closed))
+            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, GOAL, knowledge))
             hpq.heappush(openList, node)  # add it to binary heap
 
     if foundGoal:
@@ -91,15 +90,15 @@ def moveAgent(path):
     global finalPath
     for y,x in enumerate(path):
         global finalPath
-        if currentMap[x[0], x[1]] == 0:
+        if currentMap[x[0], x[1]] != 1:
             updateMap(x)  # remove fog of war
             global agent
             agent = x
             finalPath.append(x)
         else:
             finalPath = finalPath[:-1]
-            global curPath
-            curPath = [path[y-1]] # reset current path
+            global closed
+            closed = [path[y-1]] # reset current path
             break
 
 def Start(start, goal, mapA):
@@ -118,16 +117,16 @@ def Start(start, goal, mapA):
     global finalPath
     while agent != goal:
         path = findPath(agent)  # get path (need to create one for reverse)
-        # print(path)
         if path:  # if there is a path, move agent
             moveAgent(path)
         else:  # no path, unable to get to goal
             finalPath = []
-            #print("No path found")
+            print("No path found")
             break
-
-    closed.clear()
+    global closed
+    closed = []
+    knowledge.clear()
     # if finalPath:
     #     print("Final path = {}".format(finalPath))
-    # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
+    ui.gui(currentMap, len(currentMap), start, goal, finalPath)
     return [nodes, datetime.now() - startTime,bool(finalPath)]

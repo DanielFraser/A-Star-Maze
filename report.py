@@ -1,10 +1,10 @@
 from datetime import datetime
-import ui
-import Repeated as R
-import numpy as np
-import sys
-import Utility as u
 from random import randrange as rd
+
+import numpy as np
+
+import Repeated as R
+import ui
 
 # will hold results for report
 # TODO multithreading? (can't do much)
@@ -14,9 +14,12 @@ states = []
 # g values big vs small
 def createStates():
     for x in range(50):
-        isPath = False
+        y = "Mazes/maze{}.npy".format(str(x).zfill(2))
+        start = [0,0]
+        goal = [100,100]
+        a = R.AStar(y, start, goal, adaptive=True)
+        isPath = a[2]
         while not isPath:
-            y = "Mazes/maze{}.npy".format(str(x).zfill(2))
             maps = np.load(y)
             start = [rd(0,10),rd(0,10)]
             while maps[start[0], start[1]] != 0:
@@ -90,7 +93,7 @@ def part5(end=50, start=0):
     adaptive = []
     for x in range(start,end):  # goes through all 50 mazes
         y = "Mazes/maze{}.npy".format(str(x).zfill(2))
-        start = datetime.now()
+        start2 = datetime.now()
         state = states[x]
         state = list(state)
         state[0] = list(state[0])
@@ -106,10 +109,11 @@ def part5(end=50, start=0):
             rtemp[1] += b[1]
             print('b')
         print(y)
-        forward.append([round(ftemp[0] / 10), (ftemp[1] - start) / 2])
-        adaptive.append([round(rtemp[0] / 10), (rtemp[1] - start) / 2])
-    print("{} vs {}".format(forward[0][0], adaptive[0][0]))
-    print("{} vs {}".format(forward[1][0], adaptive[1][0]))
+        print(a[2]==b[2])
+        forward.append([round(ftemp[0] / 10), (ftemp[1] - start2) / 2])
+        adaptive.append([round(rtemp[0] / 10), (rtemp[1] - start2) / 2])
+    for i in range(0, end-start):
+        print("{}: {} vs {}".format(i, forward[i][0], adaptive[i][0]))
 
 def printMaze():
     for x in range(50):  # goes through all 50 mazes
@@ -117,22 +121,20 @@ def printMaze():
         ui.gui(np.load(y), 101, [2,2],[100,100])
         input()
 
-def testforpath(num=0):
+def showMap(num=0):
     y = "Mazes/maze{}.npy".format(str(num).zfill(2))
-    state = states[num]
-    a = R.AStar(y, state[0], state[1], adaptive=True)
-    print(a)
-    ui.gui(np.load(y), 101, state[0], state[1], a[3])
+    ui.gui(np.load(y), 101, [0,0], [100,100], [])
 
 if __name__ == '__main__':
-    createStates()
-    np.save('works', states)
-    # a = np.load('works.npy')
-    # states = a
+    # showMap(0)
+    # createStates()
+    # np.save('works', states)
+    a = np.load('works.npy')
+    states = a
     # print(a)
     # printMaze()
     # part2()
     # part3()
-    # part5(2)
+    part5(start=2,end=3)
     #testforpath(0)
     #mc.redoMaze(4)

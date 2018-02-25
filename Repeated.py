@@ -1,11 +1,11 @@
 import heapq as hpq
 from datetime import datetime
+
 import numpy as np
+
 import Adaptive as A
 import Utility
 import ui
-# redo closed list
-
 
 # load in a test case
 size = 101
@@ -14,7 +14,6 @@ closed = set() # always empty at start
 curPath = []
 finalPath = []
 nodes = 0
-maxSize = 0
 
 # updates map before planning route
 def updateMap(loc):
@@ -64,11 +63,13 @@ def findPath(start, reverse=False):
     current = None
     while openList:
         current = hpq.heappop(openList) # get next best position
-        closed.add(str(current.loc))  # add node to closed list
+
 
         if current.loc == localGoal: # found goal
             foundGoal = True
             break
+
+        closed.add(str(current.loc))  # add node to closed list
 
         # print(current)
         global nodes
@@ -139,7 +140,7 @@ def Start(start, goal, mapA, reverse, smallG):
     # if finalPath:
     #     print("Final path = {}".format(finalPath))
     ui.gui(currentMap, len(currentMap), start, goal, finalPath)
-    return [nodes, datetime.now() - startTime]
+    return [nodes, datetime.now() - startTime, bool(finalPath)]
 
 # # main method
 # if __name__ == '__main__':
