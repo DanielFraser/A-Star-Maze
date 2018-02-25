@@ -4,7 +4,6 @@ import Repeated as R
 import numpy as np
 import sys
 import Utility as u
-import MazeCreator as mc
 from random import randrange as rd
 
 # will hold results for report
