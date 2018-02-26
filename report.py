@@ -88,7 +88,7 @@ def part3():
 
 
 # forward vs adaptive
-def part5(end=50, start=0):
+def part5(start=0, end=50):
     forward = []
     adaptive = []
     for x in range(start,end):  # goes through all 50 mazes
@@ -113,7 +113,7 @@ def part5(end=50, start=0):
         forward.append([round(ftemp[0] / 10), (ftemp[1] - start2) / 2])
         adaptive.append([round(rtemp[0] / 10), (rtemp[1] - start2) / 2])
     for i in range(0, end-start):
-        print("{}: {} vs {}".format(i, forward[i][0], adaptive[i][0]))
+        print("{}: {} vs {}".format(i+start, forward[i][0], adaptive[i][0]))
 
 def printMaze():
     for x in range(50):  # goes through all 50 mazes
@@ -123,7 +123,7 @@ def printMaze():
 
 def showMap(num=0):
     y = "Mazes/maze{}.npy".format(str(num).zfill(2))
-    ui.gui(np.load(y), 101, [0,0], [100,100], [])
+    ui.gui(np.load(y), 101, list(states[num][0]), list(states[num][1]), [])
 
 if __name__ == '__main__':
     # showMap(0)
@@ -131,10 +131,15 @@ if __name__ == '__main__':
     # np.save('works', states)
     a = np.load('works.npy')
     states = a
+    # y = "Mazes/special.npy"
+    # a = R.AStar(y, [4,2], [4,4], adaptive=True)
+    # print(a[0])
+    # a = R.AStar(y, [4, 2], [4, 4])
+    # print(a[0])
     # print(a)
     # printMaze()
     # part2()
     # part3()
-    part5(start=2,end=3)
-    #testforpath(0)
-    #mc.redoMaze(4)
+    # print(states[5])
+    # showMap(5)
+    part5(5,6)

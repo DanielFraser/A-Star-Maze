@@ -5,7 +5,6 @@ import numpy as np
 
 import Adaptive as A
 import Utility
-import ui
 
 # load in a test case
 size = 101
@@ -14,6 +13,7 @@ closed = set() # always empty at start
 curPath = []
 finalPath = []
 nodes = 0
+ppath = []
 
 # updates map before planning route
 def updateMap(loc):
@@ -74,6 +74,7 @@ def findPath(start, reverse=False):
         # print(current)
         global nodes
         nodes += 1
+        ppath.append(str(current.loc))
 
         possibleMoves = createPossible(current.loc, openList)  # get list of all possible nodes
         for x in possibleMoves:
@@ -139,8 +140,8 @@ def Start(start, goal, mapA, reverse, smallG):
     closed.clear()
     # if finalPath:
     #     print("Final path = {}".format(finalPath))
-    ui.gui(currentMap, len(currentMap), start, goal, finalPath)
-    return [nodes, datetime.now() - startTime, bool(finalPath)]
+    # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
+    return [nodes, datetime.now() - startTime, bool(finalPath), ppath]
 
 # # main method
 # if __name__ == '__main__':

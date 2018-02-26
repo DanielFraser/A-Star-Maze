@@ -4,7 +4,6 @@ from datetime import datetime
 import numpy as np
 
 import Utility
-import ui
 
 SIZE = 101
 GOAL = [100, 100]
@@ -43,6 +42,8 @@ def getPath(start, g, current):
     global knowledge
     for x in closed: # only update ones we went to
         knowledge[str(x)] = g - knowledge[str(x)]
+        if(knowledge[str(x)] < 0):
+            print(x)
     pathL = [current.loc]
     while current.loc != start:
         current = current.parent
@@ -62,6 +63,7 @@ def findPath(start):
     current = None
     while openList:
         current = hpq.heappop(openList) # get next best position
+
         if current.loc == GOAL: # found goal
             g = current.g  # get final g
             foundGoal = True
@@ -70,13 +72,15 @@ def findPath(start):
         knowledge[str(current.loc)] = current.g  # add node to knowledge list
         closed.append(current.loc)
 
-        #print(current)
         global nodes
         nodes += 1
 
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
-            node = Utility.Node(x, current, current.g + 1, Utility.distance(x, GOAL, knowledge))
+            if str(x) in knowledge:
+                node = Utility.Node(x, current, current.g + 1, knowledge[str(x)])
+            else:
+                node = Utility.Node(x, current, current.g + 1, Utility.distance(x, GOAL))
             hpq.heappush(openList, node)  # add it to binary heap
 
     if foundGoal:
@@ -101,10 +105,11 @@ def moveAgent(path):
             closed = [path[y-1]] # reset current path
             break
 
+
 def Start(start, goal, mapA):
     startTime = datetime.now()
-    global size
-    size = len(mapA)
+    global SIZE
+    SIZE = len(mapA)
     global currentMap
     currentMap = mapA + 2
     global GOAL
@@ -128,5 +133,5 @@ def Start(start, goal, mapA):
     knowledge.clear()
     # if finalPath:
     #     print("Final path = {}".format(finalPath))
-    ui.gui(currentMap, len(currentMap), start, goal, finalPath)
+    # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
     return [nodes, datetime.now() - startTime,bool(finalPath)]

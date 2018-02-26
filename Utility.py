@@ -5,7 +5,6 @@ class Node:
         self.parent = parent
         self.g = gi
         self.f = self.g + hi
-        self.h = hi
         self.bool = smallG
 
     # almost like equals method in java, but for less than (needed for binary heap)
@@ -18,23 +17,12 @@ class Node:
             else:
                 return self.g < other.g
 
-    def adaptive(self, g):
-        self.h = g - self.g
-        self.f = self.g + self.h # difference between new and old f is g
-
-    def updateG(self, g=0):
-        self.g = g
-        self.f = self.g + self.h
-
     def __repr__(self):
         return "(loc: {}, f: {}, g: {})".format(self.loc, self.f, self.g)
 
 
-def distance(curPos, goal, closed=[]):
-    if str(curPos) in closed: # get distance from last time and remove it from closed
-        return closed[str(curPos)] # return previous h value (g(goal) - g(initial))
-    else:
-        return abs(curPos[0] - goal[0]) + abs(curPos[1] - goal[1])
+def distance(curPos, goal):
+    return abs(curPos[0] - goal[0]) + abs(curPos[1] - goal[1])
 
 
 def inRange(loc, size=100):
