@@ -118,7 +118,7 @@ def showMap(num=0):
 
 # chooses a random maze for all 3
 def demo():
-    start = rd(49)
+    start = 4
     part2(start, start+1, 1, True)
     part3(start, start+1, 1, True)
     part5(start, start+1, 1, True)
