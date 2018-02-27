@@ -5,6 +5,7 @@ import numpy as np
 
 import Adaptive as A
 import Utility
+import ui
 
 size = 101
 GOAL = [100, 100]
@@ -35,8 +36,6 @@ def createPossible(loc, openList):
                 locs.append(a)
     return locs
 
-# while we have nodes to go to
-
 # print path by starting at goal
 def getPath(start, reverse, current):
     if reverse:
@@ -47,7 +46,6 @@ def getPath(start, reverse, current):
         pathL.append(current.loc)
     if not reverse:
         pathL.reverse()
-    paths.append(pathL)
     return pathL
 
 
@@ -61,7 +59,7 @@ def findPath(start, reverse=False):
     hpq.heappush(openList, Utility.Node(start, gi=0, hi=Utility.distance(start, localGoal), smallG=gSize))
     foundGoal = False
     current = None
-    while openList:
+    while openList: # while there are nodes to go to
         current = hpq.heappop(openList) # get next best position
 
         if current.loc == localGoal: # found goal
@@ -73,15 +71,16 @@ def findPath(start, reverse=False):
         # print(current)
         global nodes
         nodes += 1
+        paths.append("{}: {}".format(nodes, current.loc))
 
         possibleMoves = createPossible(current.loc, openList)  # get list of all possible nodes
         for x in possibleMoves:
             node = Utility.Node(x, current, current.g + 1, Utility.distance(x, localGoal), smallG=gSize)
             hpq.heappush(openList, node) # add it to binary heap
 
-    if foundGoal:
+    if foundGoal: # we managed to get to goal
         return getPath(start, reverse, current)
-    else:
+    else: # no possible path found
         return []
 
 
@@ -89,27 +88,27 @@ def findPath(start, reverse=False):
 def moveAgent(path):
     global finalPath
     for y,x in enumerate(path):
-        #print(x)
         if currentMap[x[0], x[1]] == 0:  # only move to known free or unknown
             updateMap(x)  # remove fog of war
             global agent
             agent = x
             finalPath.append(x)
         else:
+            finalPath = finalPath[:-1]
             closed.clear()
             break
 
-
-def AStar(name, start = [0, 0], goal = [100, 100], reverse=False, adaptive=False, smallG = False):
+# chooses which script and functions to call
+def AStar(name, start = [0, 0], goal = [100, 100], reverse=False, adaptive=False, smallG = False, gui = False):
     mapA = np.load(name).astype(np.int8)
     if adaptive and reverse:
         print("can't do it!")
     elif adaptive and not reverse:
-        return A.Start(start, goal, mapA)
+        return A.Start(start, goal, mapA, gui)
     else:
-        return Start(start, goal, mapA, reverse, smallG)
+        return Start(start, goal, mapA, reverse, smallG, gui)
 
-def Start(start, goal, mapA, reverse, smallG):
+def Start(start, goal, mapA, reverse, smallG, gui):
     startTime = datetime.now()
     global gSize
     gSize = smallG
@@ -125,7 +124,7 @@ def Start(start, goal, mapA, reverse, smallG):
     global nodes
     nodes = 0
     global finalPath
-    while agent != goal:
+    while agent != goal: # while agent is not at goal
         path = findPath(agent, reverse)  # get path (need to create one for reverse)
         # print(path)
         if path:  # if there is a path, move agent
@@ -136,12 +135,6 @@ def Start(start, goal, mapA, reverse, smallG):
             break
 
     closed.clear()
-    # if finalPath:
-    #     print("Final path = {}".format(finalPath))
-    # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
+    if gui: # show gui if true
+        ui.gui(currentMap, len(currentMap), start, goal, finalPath)
     return [nodes, datetime.now() - startTime, bool(finalPath), paths]
-
-# # main method
-# if __name__ == '__main__':
-#     AStar('Mazes/special.npy', [4,2], [4,4], adaptive=True)
-#     AStar('Mazes/special.npy', [4, 2], [4, 4])

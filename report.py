@@ -31,122 +31,97 @@ def createStates():
         states.append([start,goal])
         print(x)
 
-def part2():
+def part2(start=0, end=0, times = 10, gui=False):
     smallg = []
     bigg = []
-    for x in range(2): # goes through all 50 mazes
+    for x in range(start, end): # goes through all 50 mazes
+        start2 = datetime.now()
+        state = [[0, 0], [100, 100]]
         ftemp = [0, datetime.now()]
         rtemp = [0, datetime.now()]
-        state = states[x]
-        state = list(state)
-        state[0] = list(state[0])
-        state[1] = list(state[1])
-        for _ in range(10):
+        for _ in range(times):
             y = "Mazes/maze{}.npy".format(str(x).zfill(2))
-            a = R.AStar(y, state[0], state[1], smallG=False)
+            a = R.AStar(y, state[0], state[1], smallG=False, gui=gui)
             ftemp[0] += a[0]
             ftemp[1] += a[1]
-            b = R.AStar(y, state[0], state[1], smallG=True)
+            b = R.AStar(y, state[0], state[1], smallG=True, gui=gui)
             rtemp[0] += b[0]
             rtemp[1] += b[1]
-        smallg.append(ftemp[0] / 10)
-        smallg.append(ftemp[1])
-        bigg.append(rtemp[0] / 10)
-        bigg.append(rtemp[1])
+            bigg.append([round(ftemp[0] / 10), (ftemp[1] - start2) / 2])
+        smallg.append([round(rtemp[0] / 10), (rtemp[1] - start2) / 2])
         print(y)
-    print(smallg)
-    print(bigg)
+    print("small g vs big g")
+    for i in range(0, end-start):
+        print("{}: {} vs {}".format(i+start, smallg[i][0], bigg[i][0]))
 
 # forward vs backward
-def part3():
+def part3(start=0, end=50, times = 10, gui=False):
     forward = []
     reverse = []
-    for x in range(2):  # goes through all 50 mazes
-        start = datetime.now()
-        state = states[x]
-        state = list(state)
-        state[0] = list(state[0])
-        state[1] = list(state[1])
+    for x in range(start, end):  # goes through all 50 mazes
+        start2 = datetime.now()
+        state = [[0, 0], [100,100]]
         ftemp = [0, datetime.now()]
         rtemp = [0, datetime.now()]
-        for _ in range(10): # so we get avg time
+        for _ in range(times): # so we get avg time
             y = "Mazes/maze{}.npy".format(str(x).zfill(2))
-            a = R.AStar(y, state[0], state[1], reverse=False)
+            a = R.AStar(y, state[0], state[1], reverse=False, gui=gui)
             ftemp[0] += a[0]
             ftemp[1] += a[1]
-            b = R.AStar(y, state[0], state[1], reverse=True)
+            b = R.AStar(y, state[0], state[1], reverse=True, gui=gui)
             rtemp[0] += b[0]
             rtemp[1] += b[1]
-            print('b')
 
-        forward.append([round(ftemp[0]/10), (ftemp[1] - start)/2])
-        reverse.append([round(rtemp[0] / 10), (rtemp[1] - start) / 2])
+        forward.append([round(ftemp[0]/10), (ftemp[1] - start2)/2])
+        reverse.append([round(rtemp[0] / 10), (rtemp[1] - start2) / 2])
         print(y)
-    print(forward)
-    print(reverse)
+    print("forward vs reverse")
+    for i in range(0, end-start):
+        print("{}: {} vs {}".format(i+start, forward[i][0], reverse[i][0]))
 
 
 # forward vs adaptive
-def part5(start=0, end=50):
+def part5(start=0, end=50, times = 10, gui=False):
     forward = []
     adaptive = []
     for x in range(start,end):  # goes through all 50 mazes
         y = "Mazes/maze{}.npy".format(str(x).zfill(2))
         start2 = datetime.now()
-        state = states[x]
-        state = list(state)
-        state[0] = list(state[0])
-        state[1] = list(state[1])
+        state = [[0, 0], [100,100]]
         ftemp = [0, datetime.now()]
         rtemp = [0, datetime.now()]
-        for _ in range(10):
-            a = R.AStar(y, state[0], state[1], adaptive=False)
+        for _ in range(times):
+            a = R.AStar(y, state[0], state[1], adaptive=False, gui=gui)
             ftemp[0] += a[0]
             ftemp[1] += a[1]
-            b = R.AStar(y, state[0], state[1], adaptive=True)
+            b = R.AStar(y, state[0], state[1], adaptive=True, gui=gui)
             rtemp[0] += b[0]
             rtemp[1] += b[1]
-            print('b')
         print(y)
-        print(a[2]==b[2])
         forward.append([round(ftemp[0] / 10), (ftemp[1] - start2) / 2])
         adaptive.append([round(rtemp[0] / 10), (rtemp[1] - start2) / 2])
+    print("forward vs adaptive")
     for i in range(0, end-start):
         print("{}: {} vs {}".format(i+start, forward[i][0], adaptive[i][0]))
 
+# prints every maze
 def printMaze():
     for x in range(50):  # goes through all 50 mazes
         y = "Mazes/maze{}.npy".format(str(x).zfill(2))
         ui.gui(np.load(y), 101, [2,2],[100,100])
         input()
 
+# show map of a certain maze
 def showMap(num=0):
     y = "Mazes/maze{}.npy".format(str(num).zfill(2))
     ui.gui(np.load(y), 101, list(states[num][0]), list(states[num][1]), [])
 
+# chooses a random maze for all 3
+def demo():
+    start = rd(49)
+    part2(start, start+1, 1, True)
+    part3(start, start+1, 1, True)
+    part5(start, start+1, 1, True)
+
 if __name__ == '__main__':
-    # showMap(0)
-    # createStates()
-    # np.save('works', states)
-    # a = np.load('works.npy')
-    # states = a
-    y = "Mazes/maze15.npy"
-    a = R.AStar(y, adaptive=True)
-    b = R.AStar(y)
-    print("a = {}, b = {}, b-a = {}".format(a[0], b[0], b[0]-a[0]))
-    print("a = {}, b = {}, b-a = {}".format(a[1], b[1], abs(b[1] - a[1])))
-    total = 0
-    for x, y in list(zip(a[3], b[3])):
-        total += len(a[3]) - len(b[3])
-        if x not in b[3]:
-            print(x)
-    print(total)
-    # a = R.AStar(y, [4, 2], [4, 4])
-    # print(a[0])
-    # print(a)
-    # printMaze()
-    # part2()
-    # part3()
-    # print(states[5])
-    # showMap(5)
-    # part5(5,6)
+    demo()

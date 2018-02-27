@@ -1,9 +1,10 @@
 import heapq as hpq
 from datetime import datetime
-import ui
+
 import numpy as np
 
 import Utility
+import ui
 
 SIZE = 101
 GOAL = [100, 100]
@@ -41,14 +42,11 @@ def getPath(start, g, current):
     global knowledge
     for x in closed: # only update ones we went to
         knowledge[str(x)] = g - knowledge[str(x)]
-        if knowledge[str(x)] < 0:
-            print(x)
     pathL = [current.loc]
     while current.loc != start:
         current = current.parent
         pathL.append(current.loc)
     pathL.reverse()
-    paths.append(pathL)
     return pathL
 
 
@@ -65,7 +63,7 @@ def findPath(start):
     hpq.heappush(openList, node)
     foundGoal = False
     current = None
-    while openList:
+    while openList: # while there are nodes to expand
         current = hpq.heappop(openList) # get next best position
 
         if current.loc == GOAL: # found goal
@@ -77,19 +75,19 @@ def findPath(start):
         closed.append(current.loc)
 
         global nodes
-        nodes += 1
+        nodes += 1  # add 1 to total nodes expanded
 
         possibleMoves = createPossible(current.loc)  # get list of all possible nodes
         for x in possibleMoves:
-            if str(x) in knowledge:
+            if str(x) in knowledge: # do we have previous knowledge of this location
                 node = Utility.Node(x, current, current.g + 1, knowledge[str(x)])
             else:
                 node = Utility.Node(x, current, current.g + 1, Utility.distance(x, GOAL))
             hpq.heappush(openList, node)  # add it to binary heap
 
-    if foundGoal:
+    if foundGoal: # we managed to get to goal
         return getPath(start, g, current)
-    else:
+    else: # no possible path found
         return []
 
 # move agent and remove fog of war
@@ -97,7 +95,6 @@ def moveAgent(path):
     global finalPath
     for y,x in enumerate(path):
         global finalPath
-        print(currentMap[x[0], x[1]])
         if currentMap[x[0], x[1]] == 0:
             updateMap(x)  # remove fog of war
             global agent
@@ -109,8 +106,8 @@ def moveAgent(path):
             closed = [path[y-1]] # reset current path
             break
 
-
-def Start(start, goal, mapA):
+# main method for adaptive
+def Start(start, goal, mapA, gui):
     startTime = datetime.now()
     global SIZE
     SIZE = len(mapA)
@@ -122,10 +119,9 @@ def Start(start, goal, mapA):
     agent = start
     updateMap(agent)  # remove fog of war
     global nodes
-    nodes = 0
+    nodes = 0   # reset nodes expanded
     global finalPath
-    print(currentMap)
-    while agent != goal:
+    while agent != goal: # until agent reaches goal
         path = findPath(agent)  # get path (need to create one for reverse)
         if path:  # if there is a path, move agent
             moveAgent(path)
@@ -134,9 +130,8 @@ def Start(start, goal, mapA):
             print("No path found")
             break
     global closed
-    closed = []
-    knowledge.clear()
-    # if finalPath:
-    #     print("Final path = {}".format(finalPath))
-    # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
+    closed = [] # clear closed
+    knowledge.clear() # clear knowledge
+    if gui: # show gui if user wants
+        ui.gui(currentMap, len(currentMap), start, goal, finalPath)
     return [nodes, datetime.now() - startTime, bool(finalPath), paths]
