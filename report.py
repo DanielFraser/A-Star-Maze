@@ -7,7 +7,6 @@ import Repeated as R
 import ui
 
 # will hold results for report
-# TODO multithreading? (can't do much)
 
 states = []
 #states[4] = [[3,1], [100,100]]
@@ -129,11 +128,19 @@ if __name__ == '__main__':
     # showMap(0)
     # createStates()
     # np.save('works', states)
-    a = np.load('works.npy')
-    states = a
-    # y = "Mazes/special.npy"
-    # a = R.AStar(y, [4,2], [4,4], adaptive=True)
-    # print(a[0])
+    # a = np.load('works.npy')
+    # states = a
+    y = "Mazes/maze15.npy"
+    a = R.AStar(y, adaptive=True)
+    b = R.AStar(y)
+    print("a = {}, b = {}, b-a = {}".format(a[0], b[0], b[0]-a[0]))
+    print("a = {}, b = {}, b-a = {}".format(a[1], b[1], abs(b[1] - a[1])))
+    total = 0
+    for x, y in list(zip(a[3], b[3])):
+        total += len(a[3]) - len(b[3])
+        if x not in b[3]:
+            print(x)
+    print(total)
     # a = R.AStar(y, [4, 2], [4, 4])
     # print(a[0])
     # print(a)
@@ -142,4 +149,4 @@ if __name__ == '__main__':
     # part3()
     # print(states[5])
     # showMap(5)
-    part5(5,6)
+    # part5(5,6)

@@ -1,6 +1,6 @@
 import heapq as hpq
 from datetime import datetime
-
+import ui
 import numpy as np
 
 import Utility
@@ -12,10 +12,11 @@ knowledge = dict() # always empty at start
 closed = []
 finalPath = []
 nodes = 0
+paths = []
 
-# updates map before planning route
+# updates map after agent moves
 def updateMap(loc):
-    for x in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
+    for x in [[-1, 0], [1, 0], [0, -1], [0, 1], [0, 0]]:
         a = np.add(loc, x)
         a = list(a)
         if Utility.inRange(a, SIZE):
@@ -35,30 +36,33 @@ def createPossible(loc):
                 locs.append(a)
     return locs
 
-# while we have nodes to go to
-
 # print path by starting at goal
 def getPath(start, g, current):
     global knowledge
     for x in closed: # only update ones we went to
         knowledge[str(x)] = g - knowledge[str(x)]
-        if(knowledge[str(x)] < 0):
+        if knowledge[str(x)] < 0:
             print(x)
     pathL = [current.loc]
     while current.loc != start:
         current = current.parent
         pathL.append(current.loc)
     pathL.reverse()
+    paths.append(pathL)
     return pathL
 
 
 # finds a path using A*
 def findPath(start):
-    g = 0 # used for adaptive
+    g = 0  # used for adaptive
     global openList
     global knowledge
     openList = []
-    hpq.heappush(openList, Utility.Node(start, hi=Utility.distance(start, GOAL)))
+    if str(start) in knowledge:
+        node = Utility.Node(start, hi=knowledge[str(start)])
+    else:
+        node = Utility.Node(start, hi=Utility.distance(start, GOAL))
+    hpq.heappush(openList, node)
     foundGoal = False
     current = None
     while openList:
@@ -88,13 +92,13 @@ def findPath(start):
     else:
         return []
 
-
 # move agent and remove fog of war
 def moveAgent(path):
     global finalPath
     for y,x in enumerate(path):
         global finalPath
-        if currentMap[x[0], x[1]] != 1:
+        print(currentMap[x[0], x[1]])
+        if currentMap[x[0], x[1]] == 0:
             updateMap(x)  # remove fog of war
             global agent
             agent = x
@@ -120,6 +124,7 @@ def Start(start, goal, mapA):
     global nodes
     nodes = 0
     global finalPath
+    print(currentMap)
     while agent != goal:
         path = findPath(agent)  # get path (need to create one for reverse)
         if path:  # if there is a path, move agent
@@ -134,4 +139,4 @@ def Start(start, goal, mapA):
     # if finalPath:
     #     print("Final path = {}".format(finalPath))
     # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
-    return [nodes, datetime.now() - startTime,bool(finalPath)]
+    return [nodes, datetime.now() - startTime, bool(finalPath), paths]

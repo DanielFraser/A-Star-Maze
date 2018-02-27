@@ -14,9 +14,7 @@ def gui(currentMap, size, start, goal, path):
 
     def cell_clicked_event(event):
         cell_x, cell_y = round(event.x / 7), round(event.y / 7)
-        f_val, g_val, h_val = 1,1,1
-        ans = "f=" + str(f_val) + "\t" + "g=" + str(g_val) + "\t" + "h=" + str(
-            h_val) + "\t" + "are the values for the coordinates:" + "\t" + "(" + str(cell_x) + "," + str(
+        ans = "for the coordinates:" + "\t" + "(" + str(cell_x) + "," + str(
             cell_y) + ")"
         topLine.set(ans)
 

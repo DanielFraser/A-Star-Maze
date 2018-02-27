@@ -6,18 +6,17 @@ import numpy as np
 import Adaptive as A
 import Utility
 
-# load in a test case
 size = 101
 GOAL = [100, 100]
 closed = set() # always empty at start
 curPath = []
 finalPath = []
 nodes = 0
-ppath = []
+paths = []
 
 # updates map before planning route
 def updateMap(loc):
-    for x in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
+    for x in [[-1, 0], [1, 0], [0, -1], [0, 1], [0,0]]:
         a = np.add(loc, x)
         a = list(a)
         if Utility.inRange(a, size):
@@ -48,6 +47,7 @@ def getPath(start, reverse, current):
         pathL.append(current.loc)
     if not reverse:
         pathL.reverse()
+    paths.append(pathL)
     return pathL
 
 
@@ -64,7 +64,6 @@ def findPath(start, reverse=False):
     while openList:
         current = hpq.heappop(openList) # get next best position
 
-
         if current.loc == localGoal: # found goal
             foundGoal = True
             break
@@ -74,7 +73,6 @@ def findPath(start, reverse=False):
         # print(current)
         global nodes
         nodes += 1
-        ppath.append(str(current.loc))
 
         possibleMoves = createPossible(current.loc, openList)  # get list of all possible nodes
         for x in possibleMoves:
@@ -92,7 +90,7 @@ def moveAgent(path):
     global finalPath
     for y,x in enumerate(path):
         #print(x)
-        if currentMap[x[0], x[1]] != 1:  # only move to known free or unknown
+        if currentMap[x[0], x[1]] == 0:  # only move to known free or unknown
             updateMap(x)  # remove fog of war
             global agent
             agent = x
@@ -141,7 +139,7 @@ def Start(start, goal, mapA, reverse, smallG):
     # if finalPath:
     #     print("Final path = {}".format(finalPath))
     # ui.gui(currentMap, len(currentMap), start, goal, finalPath)
-    return [nodes, datetime.now() - startTime, bool(finalPath), ppath]
+    return [nodes, datetime.now() - startTime, bool(finalPath), paths]
 
 # # main method
 # if __name__ == '__main__':
