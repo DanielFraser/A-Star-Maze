@@ -4,4 +4,4 @@ Using A*, we solve randomized mazes that have a fog of war (agent has to move in
 It uses repeated forward and backward A\*, as well as Adaptive A\*.
 
 ## Screenshots
-![Screenshot1](https://github.com/IHateLogicErrors/A-Star-Maze/blob/master/maze.png)
+![]({{"/images/maze.png"|absolute_url}})
