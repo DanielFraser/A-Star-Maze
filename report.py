@@ -124,4 +124,5 @@ def demo():
     part5(start, start+1, 1, True)
 
 if __name__ == '__main__':
-    R.AStar("Mazes/maze{}.npy".format(str(2).zfill(2)), [0,0], [100,100], reverse=False, gui=True)
+    R.AStar("Mazes/maze{}.npy".format(str(9).zfill(2)), [0,0], [100,100], reverse=False, gui=True)
+
