@@ -22,10 +22,10 @@ def gui(currentMap, size, start, goal, path):
     for x in range(0, width * 7, 7):
         for y in range(0, height * 7, 7):
             #print("{},{} = {}".format(x/7, y/7, currentMap[round(x / 7), round(y / 7)]))
-            if currentMap[round(y / 7)][round(x / 7)] == 0:
+            if currentMap[round(y / 7)][round(x / 7)] %2 == 0:
                 single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='white')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
-            elif currentMap[round(y / 7)][round(x / 7)] == 1:
+            elif currentMap[round(y / 7)][round(x / 7)] %2 == 1:
                 single_cell = w.create_rectangle(x, y, x + 7, y + 7, fill='black')
                 w.tag_bind(single_cell, "<ButtonPress-1>", cell_clicked_event)
             if [round(y / 7), round(x / 7)] in path:
