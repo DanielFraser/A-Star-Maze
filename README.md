@@ -1,13 +1,4 @@
 # A-Star-Maze
-Using A*, we solve randomized mazes
+Using A*, we solve randomized mazes.
 
-### TODO
-
-* :heavy_check_mark: Create 50 randomized mazes
-* :construction: Create a gui to visualize the maze
-* :heavy_check_mark: A* Algorithms
-    * :heavy_check_mark: Forward
-    * :heavy_check_mark: Backward
-    * :heavy_check_mark: Adaptive
-
-    https://www.overleaf.com/read/hgcpghcrbtyd
+It uses repeated forward and backward A\*, as well as Adaptive A\*.
